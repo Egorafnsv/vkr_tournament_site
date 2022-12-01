@@ -1,0 +1,135 @@
+{% extends 'main/base.html' %}
+
+{% block title %} {{club.club.name}} {% endblock %}
+
+
+{% block content %}
+    <div class="container">
+
+        <div class="row text-center">
+            <div class="col">
+                <h2>
+                    <a class="link-dark" href="/tournament/{{club.club.tournament.uid}}/">{{club.club.tournament}}</a>
+                </h2>
+                <br>
+                <h2>{{club.club.name}}</h2>
+            </div>
+        </div>
+
+        <div class="row text-center mt-4">
+            {% if access %}
+                <div class="col">
+                    <hr>
+                    <h4>Заметки</h4>
+                    <form method="post">
+                        {% csrf_token %}
+                        <textarea cols="35" rows="5" name="notes" maxlength="500" placeholder="Поле для заметок">{% if club.club.notes %}{{club.club.notes}}{% endif %}</textarea>
+                        <br>
+                        <button type="submit" class="btn btn-outline-success btn-sm mt-1" name="add-notes" value="1">Сохранить</button>
+                    </form>
+                </div>
+            {% endif %}
+            <div class="col">
+                <hr>
+                <h4>Матчи</h4>
+                    {% for match in club.list_matches %}
+                        {% if match.1 %}
+                            <a class="link-dark text-decoration-none" href="/view-match/{{club.club.tournament.uid}}/{{match.0}}"><p>{{match.2}}</p></a>
+                        {% else %}
+                            {% if access %}
+                                <a class="link-dark text-decoration-none" href="/add-score/{{club.club.tournament.uid}}/{{match.0}}"><p>{{match.2}}</p></a>
+                            {% else %}
+                                <p>{{match.2}}</p>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+            </div>
+        </div>
+
+        <div class="row text-center mt-4">
+            <div class="col">
+                <hr>
+                <h4>Состав</h4>
+                    {% if access %}
+                    <form action="" method="post" onsubmit="return confirm('Выбранные игроки и их личная статистика будет удалена. Вы уверены?');">
+                        {%csrf_token%}
+                    {% endif %}
+                        <table class="mb-2 table table-light table-striped table-hover">
+                            <tr>
+                                <th>Номер</th>
+                                <th>Имя, Фамилия</th>
+                                <th>Голы</th>
+                                <th>ЖК</th>
+                                <th>КК</th>
+                                {% if access %}
+                                    <th>Удалить</th>
+                                {% endif %}
+                            </tr>
+                        {% for player in club.players %}
+                            <tr>
+                                <td>{{player.number}}</td>
+                                <td>{{player.name}}</td>
+                                <td>{{player.goals}}</td>
+                                <td>{{player.yellow}}</td>
+                                <td>{{player.red}}</td>
+                                {% if access %}
+                                    <td><input name="delete-player" type="checkbox" value="{{player.id}}"></td>
+                                {% endif %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6">В команде нет игроков</td>
+                            </tr>
+                        {% endfor %}
+
+                        {% if access and club.players|length > 0 %}
+                        <tr>
+                            <td colspan="5"></td>
+                            <td>
+                                <button class="btn btn-outline-danger btn-sm" type="submit" name="del-players" value="1">Удалить</button>
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                        </table>
+
+                    {% if access %}
+                    </form>
+                    {% endif %}
+
+                {% if access %}
+                    <form action="" method="post">
+                        {%csrf_token%}
+                        {{form.as_table}}
+                        <button class="btn btn-outline-success" type="submit" name="add-players" value="1">Добавить</button>
+                    </form>
+                {% endif %}
+            </div>
+
+            <div class="col">
+                <hr>
+                <h4>Дисквалифицированные</h4>
+                <table class="mb-2 table table-light table-striped table-hover">
+                    <tr>
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                    </tr>
+
+                    {% for player in club.players %}
+                        {% if player.disqualified %}
+                            <tr>
+                                <td>{{player.number}}</td>
+                                <td>{{player.name}}</td>
+                            </tr>
+                        {% endif %}
+                    {% empty %}
+                        <tr>
+                            <td colspan="5">Нет игроков с дисквалификациями</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

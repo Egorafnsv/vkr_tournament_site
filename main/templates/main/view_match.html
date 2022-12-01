@@ -1,0 +1,185 @@
+{% extends 'main/base.html' %}
+
+{% block title %} {{match.club_home}} {{match.home_goals}}:{{match.away_goals}} {{match.club_away}} {% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col text-center">
+                <h1>
+                    <a class="link-dark" href="/tournament/{{match.tournament.uid}}">{{match.tournament}}</a>
+                </h1>
+            </div>
+        </div>
+
+            <div class="row">
+                <hr class="mb-0 mt-3">
+                <div class="col text-center">
+                    {% if match.tournament.type == "L" %}
+                        <h2>{{match.stage}} тур</h2>
+                    {% else %}
+                        {% if match.text_stage != "1/1" %}
+                            <h2>{{ match.text_stage }}</h2>
+                        {% else %}
+                            <h2>Финал</h2>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <h3><a class="link-primary text-decoration-none" href="/club/{{match.tournament.uid}}/{{match.club_home.id}}/">{{match.club_home}}</a>
+                    {{match.home_goals}} : {{match.away_goals}}
+                    <a class="link-danger text-decoration-none" href="/club/{{match.tournament.uid}}/{{match.club_away.id}}/">{{match.club_away}}</a></h3>
+            </div>
+        </div>
+        <div class="row">
+            <hr class="mb-0 mt-2">
+            <div class="col text-center">
+                <h3>Голы</h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table class="table table-light table-striped table-hover">
+                    <tr class="table-primary">
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                    </tr>
+                        {% for player in home_goals %}
+                            <tr>
+                                <td>{{player.0}}</td>
+                                <td>{{player.1}}</td>
+                            </tr>
+                        {% empty %}
+                            <tr class="text-center">
+                                <td colspan="2">Информация отсутствует</td>
+                            </tr>
+                        {% endfor %}
+                </table>
+            </div>
+
+            <div class="col">
+                <table class="table table-light table-striped table-hover">
+                    <tr class="table-danger">
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                    </tr>
+                        {% for player in away_goals %}
+                            <tr>
+                                <td>{{player.0}}</td>
+                                <td>{{player.1}}</td>
+                            </tr>
+                        {% empty %}
+                            <tr class="text-center">
+                                <td colspan="2">Информация отсутствует</td>
+                            </tr>
+                        {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <div class="row text-center">
+            <h3>Желтые карточки</h3>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table class="table table-light table-striped table-hover">
+                    <tr class="table-primary">
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                    </tr>
+                    {% for player in home_yellow %}
+                        <tr>
+                            <td>{{player.0}}</td>
+                            <td>{{player.1}}</td>
+                        </tr>
+                    {% empty %}
+                        <tr class="text-center">
+                            <td colspan="2">Информация отсутствует</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="col">
+                <table class="table table-light table-striped table-hover">
+                    <tr class="table-danger">
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                    </tr>
+                        {% for player in away_yellow %}
+                            <tr>
+                                <td>{{player.0}}</td>
+                                <td>{{player.1}}</td>
+                            </tr>
+                        {% empty %}
+                            <tr class="text-center">
+                                <td colspan="2">Информация отсутствует</td>
+                            </tr>
+                        {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <div class="row text-center">
+            <h3>Красные карточки</h3>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <table class="table table-light table-striped table-hover">
+                    <tr class="table-primary">
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                    </tr>
+                        {% for player in home_red %}
+                            <tr>
+                                <td>{{player.0}}</td>
+                                <td>{{player.1}}</td>
+                            </tr>
+                        {% empty %}
+                            <tr class="text-center">
+                                <td colspan="2">Информация отсутствует</td>
+                            </tr>
+                        {% endfor %}
+                </table>
+            </div>
+
+            <div class="col">
+                <table class="table table-light table-striped table-hover">
+                    <tr class="table-danger">
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                    </tr>
+                        {% for player in away_red %}
+                            <tr>
+                                <td>{{player.0}}</td>
+                                <td>{{player.1}}</td>
+                            </tr>
+                        {% empty %}
+                            <tr class="text-center">
+                                <td colspan="2">Информация отсутствует</td>
+                            </tr>
+                        {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col d-flex justify-content-center">
+                {% if match.tournament.type != "P" and access %}
+                    <form action="" method="post">
+                        {%csrf_token%}
+                        <button type="submit" class="btn btn-danger btn-sm" name="delete" value="del">Удалить</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

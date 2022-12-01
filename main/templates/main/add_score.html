@@ -1,0 +1,161 @@
+{% extends 'main/base.html' %}
+
+{% block title %}
+{{match.club_home}} - {{match.club_away}}
+{% endblock %}
+
+{% block content %}
+    {% load static %}
+    <script src="{% static 'check_goals.js' %}"></script>
+
+    {% if last_match %}
+        <script src="{% static 'check_playoff_stage.js' %}"></script>
+    {% endif %}
+
+<div class="container">
+
+    <div class="row text-center">
+
+        <div class="col text-center">
+
+            <h1><a href="/tournament/{{match.tournament.uid}}/" class="link-dark">{{match.tournament}}</a></h1>
+
+            <hr>
+
+            {% if match.tournament.type == "L" %}
+                <h2>{{match.stage}} тур</h2>
+            {% else %}
+                {% if match.text_stage != "1/1" %}
+                    <h2>{{ match.text_stage }}</h2>
+                {% else %}
+                    <h2>Финал</h2>
+                {% endif %}
+            {% endif %}
+
+            <hr>
+
+            {% if last_match %}
+                <h3>Общий счет в серии<br>{{total_score.0}}:{{total_score.1}}</h3>
+
+                <hr class="pb-2">
+
+                <form method="post" onsubmit="return check_playoff_stage({{total_score.0}}, {{total_score.1}})">
+            {% else %}
+                <form action="" method="post">
+            {% endif %}
+
+            {%csrf_token%}
+            <h3>
+                <a href="/club/{{match.tournament.uid}}/{{match.club_home.id}}/" class="link-primary text-decoration-none">{{match.club_home}}</a>
+                <input style="width:75px;" type="number" min="0" value="0" id="hg" name="home_goals" onchange="check_goals()">
+                -
+                <input style="width:75px;" type="number" min="0" value="0" id="ag" name="away_goals" onchange="check_goals()">
+                <a href="/club/{{match.tournament.uid}}/{{match.club_away.id}}/" class="link-danger text-decoration-none">{{match.club_away}}</a>
+            </h3>
+
+                 {% if last_match_in_stage %}
+                    <p>Этот матч - последний в серии, завершите предыдущие встречи</p>
+                    <p><button class="btn btn-success mt-2" disabled>Сохранить</button></p>
+                 {% else %}
+                    <p><button type="submit" class="btn btn-success mt-2" name="save" value="save" id="save-match">Сохранить</button></p>
+                 {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col">
+            <table class="table table-sm table-light table-striped table-hover">
+                <tr class="table-primary">
+                    <th style="width: 200px;">Игрок</th>
+                    <th>Голы</th>
+                    <th>ЖК</th>
+                    <th>КК</th>
+                    <th>Отбыл дискв.</th>
+                </tr>
+                {% for i in home_players %}
+                    <tr>
+                        <td>{{i}}</td>
+                        {% if i.disqualified%}
+                            <td ><input style="width: 75px;" type="number" disabled></td>
+                            <td><input type="checkbox" disabled></td>
+                            <td><input type="checkbox" disabled></td>
+                            <td><input name="disq" type="checkbox" value="{{i.id}}" checked></td>
+                        {%else%}
+                            <td><input style="width: 75px;" type="number" min="0" value="0" name="home_goal_{{i.id}}" class="home-goals" onchange="check_goals()"></td>
+                            <td><input name="yellow" type="checkbox" value="{{i.id}}"></td>
+                            <td><input name="red" type="checkbox" value="{{i.id}}"></td>
+                            <td>Не дискв.</td>
+                        {% endif %}
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">Нет заявленных игроков!</td>
+                    </tr>
+                {% endfor %}
+
+            </table>
+        </div>
+
+
+        <div class="col d-flex justify-content-center">
+            <table class="table table-sm table-light table-striped table-hover">
+                <tr  class="table-danger">
+                    <th style="width: 200px;">Игрок</th>
+                    <th>Голы</th>
+                    <th>ЖК</th>
+                    <th>КК</th>
+                    <th>Отбыл дискв.</th>
+                </tr>
+                {% for i in away_players %}
+                    <tr>
+                        <td>{{i}}</td>
+                        {% if i.disqualified%}
+                            <td><input style="width: 75px;" type="number" disabled></td>
+                            <td><input type="checkbox" disabled></td>
+                            <td><input type="checkbox" disabled></td>
+                            <td><input name="disq" type="checkbox" value="{{i.id}}" checked></td>
+                        {%else%}
+                            <td><input style="width: 75px;" type="number" min="0" value="0" name="away_goal_{{i.id}}" class="away-goals" onchange="check_goals()"></td>
+                            <td><input name="yellow" type="checkbox" value="{{i.id}}"></td>
+                            <td><input name="red" type="checkbox" value="{{i.id}}"></td>
+                            <td>Не дискв.</td>
+                        {%endif%}
+                    </tr>
+                {% empty %}
+                    <td colspan="5" class="text-center">Нет заявленных игроков!</td>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+                </form> <!-- открыто - 42/44, статистика игроков -->
+
+    <div class="row">
+
+        <div class="col">
+
+            <div class="text-danger text-center">
+                <p id="status-home-goals"></p>
+            </div>
+
+        </div>
+
+            <div class="col">
+
+            <div class="text-danger text-center">
+                <p id="status-away-goals"></p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+    check_goals()
+</script>
+
+{% endblock %}

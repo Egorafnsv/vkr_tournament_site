@@ -1,0 +1,51 @@
+{% extends 'main/base.html' %}
+
+{% block title %} Home title! {% endblock %}
+{% block content %}
+    <h2><a class="link-dark mt-3" href="/tournament/{{tournament.uid}}/">{{tournament}}</a></h2>
+    <h2 class="mt-3">Список администраторов</h2>
+
+    <form action="" method="post" onsubmit="return confirm('Вы уверены, что хотите внести изменения? Добавленные пользователи
+    имеют такой же функционал, как и вы, кроме удаления турнира и управления списком администраторов.');">
+        {% csrf_token %}
+        <table class="mt-3 table table-light table-striped table-hover text-center">
+            <tr>
+                <th>Имя</th>
+                <th>Удалить</th>
+            </tr>
+
+            {% for admin in admins %}
+                <tr>
+                    <td>{{admin}}</td>
+                    <td><input name="delete-admin" type="checkbox" value="{{admin}}"></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2" align="center">Нет ни одного добавленного администратора</td>
+                </tr>
+            {% endfor %}
+
+            {% if admins|length > 0 %}
+                <tr>
+                    <td colspan="2" align="center">
+                        <button class="btn btn-outline-danger btn-sm" type="submit" name="del-admins" value="1">Удалить</button>
+                    </td>
+                </tr>
+            {% endif %}
+
+            <tr>
+                <td>
+                    <input type="text" name="name-admin">
+                </td>
+                <td>
+                    <button class="btn btn-outline-success btn-sm" type="submit" name="add-admin" value="1">Добавить</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    <div class="text-danger text-center">
+        <p>{{error}}</p>
+    </div>
+
+{% endblock %}

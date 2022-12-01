@@ -1,0 +1,264 @@
+{% extends 'main/base.html' %}
+
+
+{% block title %} {{tournament}} {% endblock %}
+
+{% block content %}
+
+    <div class="ms-3">
+        <div class="container">
+
+            <div class="row justify-content-md-center mb-3">
+                <div class="col-md-auto">
+                    <h2>{{tournament}}</h2>
+                </div>
+            </div>
+
+            <hr class="mb-0">
+
+            <div class="row justify-content-md-center mb-2">
+                <div class="col-md-auto">
+                    <h4>Расписание матчей</h4>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col text-center">
+
+                    {% if access %}
+                    <form method="post">
+                        {%csrf_token%}
+                    {% endif %}
+
+                        <table class="table table-sm table-light table-striped table-hover">
+                            <tr>
+                                <th class="table-warning" colspan="3">Предстоящие</th>
+                            </tr>
+
+                            {% for m in uncompleted_matches %}
+                                <tr>
+                                    <td>
+                                        {{m.stage}} тур
+                                    </td>
+                                    {% if access %}
+                                        <td>
+                                            <a href="/add-score/{{uid}}/{{m.id}}" class="link-dark">
+                                                {{m.club_home}} -:- {{m.club_away}}
+                                            </a>
+                                        </td>
+
+                                        <td  align="center">
+                                            <input type="datetime-local" name="{{m.id}}" value="{{m.matchday|date:'Y-m-d'}}T{{m.matchday|time:'H:i:s'}}">
+                                        </td>
+                                    {% else %}
+                                        <td>
+                                            {{m.club_home}} -:- {{m.club_away}}
+                                        </td>
+
+                                        <td  align="center">
+                                            {{m.matchday|date:'Y-m-d'}} {{m.matchday|time:'H:i:s'}}
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="2" align="center">Все матчи сыграны!</td>
+                                </tr>
+                            {% endfor %}
+
+                            {% if access != 0 and uncompleted_matches|length > 0 %}
+                                <tr>
+                                    <td colspan="2"></td>
+                                    <td align="center">
+                                        <button class="btn btn-outline-success btn-sm" type="submit" name="save-dates" value="1">Сохранить</button>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </table>
+                    </form>
+                </div>
+
+                <div class="col text-center">
+                    <table class="table table-sm table-light table-striped table-hover">
+                        <tr>
+                            <th class="table-success" colspan="3">Завершенные</th>
+                        </tr>
+                        {% for m in completed_matches %}
+                            <tr>
+                                <td>
+                                    {{m.stage}} тур
+                                </td>
+                                <td>
+                                    <a href="/view-match/{{uid}}/{{m.id}}" class="link-dark">
+                                        {{m.club_home}} {{m.home_goals}}:{{m.away_goals}} {{m.club_away}}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="2" align="center">Все матчи сыграны!</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mb-0">
+
+        <div class="row justify-content-md-center">
+            <div class="col-md-auto">
+                <h4>Таблица</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <table class="table table-light table-striped table-hover">
+                    <tr>
+                        <th>Клуб</th>
+                        <th>В</th>
+                        <th>Н</th>
+                        <th>П</th>
+                        <th>Забито</th>
+                        <th>Пропущено</th>
+                        <th>Разница</th>
+                        <th>О</th>
+                    </tr>
+                    {% for row in rows %}
+                    <tr>
+                        <td>
+                            <a href="/club/{{uid}}/{{row.0}}/" class="link-dark">{{row.1}}</a>
+                        </td>
+
+                        {% for cell in row|slice:"2:" %}
+                            <td>{{cell}}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <hr class="mb-0">
+
+        <div class="row justify-content-md-center">
+            <div class="col-md-auto">
+                <h4>Личная статистика</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <h5>Бомбардиры</h5>
+                <table class="table table-sm table-light table-striped table-hover">
+                    <tr>
+                        <th>Команда</th>
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                        <th>Голов</th>
+                    </tr>
+                    {% if goals|length == 0 %}
+                        <tr>
+                            <td colspan="4" align="center">Нет голов - нет бомбардиров</td>
+                        </tr>
+                    {% else %}
+                        {% for player in goals %}
+                            <tr>
+                                <td>{{player.0}}</td>
+                                <td>{{player.1}}</td>
+                                <td>{{player.2}}</td>
+                                <td>{{player.3}}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </table>
+            </div>
+
+            <div class="col text-center">
+                <h5>Дисквалифицированные</h5>
+                <table class="table table-sm table-light table-striped table-hover">
+                    <tr>
+                        <th>Команда</th>
+                        <th>Номер</th>
+                        <th>Фамилия</th>
+                    </tr>
+                    {% if disqualified|length == 0 %}
+                        <tr>
+                            <td colspan="3" align="center">Список пустует</td>
+                        </tr>
+                    {% else %}
+                        {% for player in disqualified %}
+                            <tr>
+                                <td>{{player.0}}</td>
+                                <td>{{player.1}}</td>
+                                <td>{{player.2}}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+
+        {% if access == 2 %}
+            {% if league_finish %}
+                <form method="post" onsubmit="return confirm('Будет создан турнир с форматом плей-офф, продолжить?');">
+            {% else %}
+                <form method="post" onsubmit="return confirm('Остались незавершенные матчи. Вы уверены, что хотите продолжить?');">
+            {% endif %}
+                    {% csrf_token %}
+                    <hr class="mt-5">
+
+            <div class="row">
+                <div class="col  text-center">
+                    <label style="font-size:15px;" for="rounds">Встреч в раунде</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col d-flex justify-content-md-center ps-0 pe-5">
+                    <select class="form-select form-select-sm ms-5" style="width:auto;" id="rounds" name="rounds">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col  text-center">
+                    <label style="font-size:15px;">Мест в плей-офф</label>
+                </div>
+            </div>
+                <div class="row">
+                    <div class="col d-flex justify-content-md-center ps-0 pe-5">
+                        <select class="form-select form-select-sm ms-5" style="width:auto;" id="how-much-clubs-to-playoff" name="count-club-to-playoff">
+                            {% for i in playoff_clubs %}
+                                <option value="{{i.0}}">{{i.1}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row mt-2 mb-2">
+                        <div class="col d-flex justify-content-md-center ps-4">
+                            <button class="btn btn-secondary btn-sm" type="submit" name="go-to-playoff" value="1">Перейти к плей-офф</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col d-flex justify-content-md-center mt-4">
+                        <form method="post" onsubmit="return confirm('Турнир будет удален, в том числе все команды и их игроки. Продолжить?');">
+                            {% csrf_token %}
+                            <button class="btn btn-danger btn-sm" type="submit" name="delete-trn" value="1">Удалить турнир</button>
+                        </form>
+                    </div>
+                </div>
+                </form>
+
+                <div class="row">
+                    <div class="col text-center mt-3">
+                        <a class="link-dark" href="/admins/{{uid}}/">Список администраторов</a>
+                    </div>
+                </div>
+        {% endif %}
+    </div>
+{% endblock %}

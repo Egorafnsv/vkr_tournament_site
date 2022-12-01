@@ -1,0 +1,116 @@
+{% extends 'main/base.html' %}
+
+{% block title %} Список турниров {% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col text-center">
+                <h2 class="mt-3">Свои чемпионаты</h2>
+            </div>
+
+            <hr>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <table class="table table-sm table-light table-striped table-hover">
+
+                    <tr>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Количество команд</th>
+                        <th>Кругов</th>
+                    </tr>
+
+                    {% for tournament in user.tournament.all %}
+                        <tr>
+                            <td>
+                               <a class="link-secondary" href="/tournament/{{tournament.uid}}">{{tournament.name}}</a>
+                            </td>
+                            <td>
+                                <a class="link-secondary" href="/tournament/{{tournament.uid}}">
+                                    {{tournament.get_type_display}}
+                                </a>
+                            </td>
+                            <td>
+                                <a class="link-secondary" href="/tournament/{{tournament.uid}}">
+                                {{tournament.count_clubs}}
+                                </a>
+                            </td>
+                            <td>
+                                <a class="link-secondary" href="/tournament/{{tournament.uid}}">
+                                {{tournament.rounds}}
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr class="text-center">
+                            <td colspan="4">Вы ещё ничего не создали, <a href="/choose-window/" class="link-info">создать</a></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+            </div>
+
+            <hr>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <h2 class="mt-3">Администрируемые чемпионаты</h2>
+            </div>
+
+            <hr>
+        </div>
+
+        <div class="row">
+            <div class="col text-center">
+                <table class="table table-sm table-light table-striped table-hover">
+                    <tr>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Количество команд</th>
+                        <th>Кругов</th>
+                    </tr>
+
+                    {% for tournament in user.admins.all %}
+                        <tr>
+                            <td>
+                               <a class="link-secondary" href="/tournament/{{tournament.uid}}">{{tournament.name}}</a>
+                            </td>
+                            <td>
+                                <a class="link-secondary" href="/tournament/{{tournament.uid}}">
+                                    {{tournament.get_type_display}}
+                                </a>
+                            </td>
+                            <td>
+                                <a class="link-secondary" href="/tournament/{{tournament.uid}}">
+                                {{tournament.count_clubs}}
+                                </a>
+                            </td>
+                            <td>
+                                <a class="link-secondary" href="/tournament/{{tournament.uid}}">
+                                {{tournament.rounds}}
+                                </a>
+                            </td>
+                        </tr>
+
+                    {% empty %}
+                        <tr class="text-center">
+                            <td colspan="4">Вы не являетесь администратором других турниров</td>
+                        </tr>
+
+                    {% endfor %}
+
+                </table>
+
+            </div>
+
+            <hr>
+        </div>
+
+    </div>
+
+{% endblock %}
